@@ -1,0 +1,33 @@
+{
+  "name": "dveri",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@formkit/auto-animate": "^0.8.2",
+    "@supabase/supabase-js": "^2.50.0",
+    "axios": "^1.9.0",
+    "emailjs-com": "^3.2.0",
+    "firebase": "^11.9.1",
+    "lodash.debounce": "^4.0.8",
+    "pinia": "^3.0.3",
+    "swiper": "^11.2.8",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-legacy": "^6.1.1",
+    "@vitejs/plugin-vue": "^5.2.3",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.3",
+    "regenerator-runtime": "^0.14.1",
+    "sass": "^1.89.1",
+    "tailwindcss": "^3.4.1",
+    "vite": "^6.3.5"
+  }
+}

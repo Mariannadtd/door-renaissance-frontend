@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Дверной Ренессанс</title>
+    <meta
+      name="description"
+      content="Интернет-магазин дверей, полов и фурнитуры."
+    />
+
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
+    <link rel="icon" type="image/png" sizes="256x256" href="/favicon-256.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Cormorant+Garamond:wght@400;600;700&family=EB+Garamond:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      html {
+        -webkit-text-size-adjust: 100%;
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: "Montserrat", system-ui, -apple-system, "Segoe UI", Roboto,
+          Arial, sans-serif;
+      }
+      img,
+      svg,
+      video {
+        max-width: 100%;
+        height: auto;
+      }
+      html,
+      body {
+        overflow-x: hidden;
+      }
+    </style>
+
+    <script type="module" src="/src/main.js" crossorigin></script>
+  </head>
+
+  <body>
+    <div id="app"></div>
+    <script>
+      window.addEventListener("error", function (e) {
+        var d = document.createElement("div");
+        d.style.cssText =
+          "position:fixed;left:8px;bottom:8px;z-index:999999;background:#000;color:#fff;padding:8px 10px;border-radius:8px;font:12px/1.4 system-ui;max-width:90vw;white-space:pre-wrap;";
+        d.textContent = "JS error: " + (e.message || e.type);
+        document.body.appendChild(d);
+      });
+      window.addEventListener("unhandledrejection", function (e) {
+        var d = document.createElement("div");
+        d.style.cssText =
+          "position:fixed;left:8px;bottom:48px;z-index:999999;background:#000;color:#fff;padding:8px 10px;border-radius:8px;font:12px/1.4 system-ui;max-width:90vw;white-space:pre-wrap;";
+        d.textContent =
+          "Promise error: " +
+          (e.reason && e.reason.message ? e.reason.message : e.reason);
+        document.body.appendChild(d);
+      });
+    </script>
+  </body>
+</html>
