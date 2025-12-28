@@ -1,6 +1,14 @@
 <script setup>
 import { ref, onMounted, computed, watch, onBeforeUnmount } from "vue";
-import { collection, getDocs } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+  orderBy,
+  limit,
+  startAfter,
+} from "firebase/firestore";
 import { db } from "../firebase";
 
 import Catalog from "../components/Catalog.vue";
@@ -12,6 +20,14 @@ import SkeletonCard from "../components/UI/Preloader.vue";
 const products = ref([]);
 const searchQuery = ref("");
 const loading = ref(true);
+const loadingMore = ref(false);
+const hasMore = ref(true);
+const lastDoc = ref(null);
+
+const PAGE = 42;
+
+const bottomEl = ref(null);
+let io = null;
 
 const controlsKey = ref(0);
 const filterKey = ref(0);
@@ -34,18 +50,62 @@ const norm = (v) =>
     .replace(/ё/g, "е")
     .trim();
 
+async function loadMore() {
+  if (loadingMore.value || !hasMore.value) return;
+  loadingMore.value = true;
+
+  try {
+    const base = [
+      where("category", "==", "interiors"),
+      orderBy("createdAt", "desc"),
+      limit(PAGE),
+    ];
+
+    const q = lastDoc.value
+      ? query(
+          collection(db, "products"),
+          ...base.slice(0, 2),
+          startAfter(lastDoc.value),
+          base[2]
+        )
+      : query(collection(db, "products"), ...base);
+
+    const snap = await getDocs(q);
+
+    const batch = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    products.value.push(...batch);
+
+    if (snap.docs.length) lastDoc.value = snap.docs[snap.docs.length - 1];
+
+    if (snap.docs.length < PAGE) hasMore.value = false;
+  } finally {
+    loadingMore.value = false;
+  }
+}
+
 onMounted(async () => {
   const started = Date.now();
-  const snap = await getDocs(collection(db, "products"));
-  products.value = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+  await loadMore();
+
   const MIN_SKELETON_MS = 500;
   const remain = Math.max(0, MIN_SKELETON_MS - (Date.now() - started));
   setTimeout(() => (loading.value = false), remain);
+
+  io = new IntersectionObserver(
+    ([entry]) => {
+      if (entry.isIntersecting) loadMore();
+    },
+    { rootMargin: "900px" }
+  );
+
+  if (bottomEl.value) io.observe(bottomEl.value);
 });
 
-const interiors = computed(() =>
-  products.value.filter((p) => p.category === "interiors")
-);
+onBeforeUnmount(() => {
+  if (io) io.disconnect();
+  if (resetTimerId) clearTimeout(resetTimerId);
+});
 
 const sortFilter = {
   key: "sort",
@@ -69,7 +129,7 @@ const filtersConfig = [
 ];
 
 const processed = computed(() => {
-  let arr = interiors.value;
+  let arr = products.value;
 
   const q = norm(searchQuery.value);
   if (q) arr = arr.filter((p) => norm(p.name).includes(q));
@@ -115,10 +175,6 @@ watch(
   { immediate: true, deep: true }
 );
 
-onBeforeUnmount(() => {
-  if (resetTimerId) clearTimeout(resetTimerId);
-});
-
 const resetFilters = () => {
   searchQuery.value = "";
   filterState.value = defaultFilters();
@@ -156,6 +212,13 @@ const resetFilters = () => {
   <div v-if="loading" class="skeleton-grid">
     <SkeletonCard v-for="n in 6" :key="n" />
   </div>
+
+  <div ref="bottomEl" style="height: 1px"></div>
+
+  <p v-if="!loading && loadingMore" class="no-results">Загружаю ещё…</p>
+  <p v-else-if="!loading && !hasMore && products.length" class="no-results">
+    Больше товаров нет
+  </p>
 
   <p v-if="!loading && showNoResults" class="no-results">
     Товары с выбранными фильтрами отсутствуют!

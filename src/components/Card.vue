@@ -11,7 +11,6 @@ const props = defineProps({
   id: { type: String, required: true },
   isHit: { type: [String, Boolean], default: "" },
   isExhibit: { type: [String, Boolean], default: "" },
-  // 🔥 ВАЖНО: категория товара
   category: { type: String, default: "" },
 });
 
@@ -33,9 +32,7 @@ function onAddToCart() {
       name: props.title,
       price: Number(props.price),
       images: [props.image],
-      // можно не передавать quantity, store сам ставит 1, но не мешает:
       quantity: 1,
-      // 👉 тащим категорию в корзину
       category: props.category || null,
     });
   }

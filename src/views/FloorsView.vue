@@ -1,6 +1,14 @@
 <script setup>
 import { ref, onMounted, computed, watch, onBeforeUnmount } from "vue";
-import { collection, getDocs } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+  orderBy,
+  limit,
+  startAfter,
+} from "firebase/firestore";
 import { db } from "../firebase";
 
 import Catalog from "../components/Catalog.vue";
@@ -13,11 +21,20 @@ const products = ref([]);
 const searchQuery = ref("");
 const loading = ref(true);
 
+const loadingMore = ref(false);
+const hasMore = ref(true);
+const lastDoc = ref(null);
+
+const PAGE = 40;
+
+const bottomEl = ref(null);
+let io = null;
+
 const controlsKey = ref(0);
 const filterKey = ref(0);
 const searchKey = ref(0);
 
-const filterState = ref({
+const defaultFilters = () => ({
   sort: "",
   form: "",
   structure: "",
@@ -30,6 +47,8 @@ const filterState = ref({
   surface: [],
 });
 
+const filterState = ref(defaultFilters());
+
 const norm = (v) =>
   (v ?? "")
     .toString()
@@ -40,15 +59,54 @@ const norm = (v) =>
     .replace(/ё/g, "е")
     .trim();
 
-onMounted(async () => {
-  const snap = await getDocs(collection(db, "products"));
-  products.value = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-  loading.value = false;
-});
+async function loadMore() {
+  if (loadingMore.value || !hasMore.value) return;
+  loadingMore.value = true;
 
-const floors = computed(() =>
-  products.value.filter((p) => p.category === "floors")
-);
+  try {
+    const base = [
+      where("category", "==", "floors"),
+      orderBy("createdAt", "desc"),
+      limit(PAGE),
+    ];
+
+    const q = lastDoc.value
+      ? query(
+          collection(db, "products"),
+          ...base.slice(0, 2),
+          startAfter(lastDoc.value),
+          base[2]
+        )
+      : query(collection(db, "products"), ...base);
+
+    const snap = await getDocs(q);
+
+    const batch = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    products.value.push(...batch);
+
+    if (snap.docs.length) lastDoc.value = snap.docs[snap.docs.length - 1];
+    if (snap.docs.length < PAGE) hasMore.value = false;
+  } catch (e) {
+    console.error("floors loadMore error:", e);
+    hasMore.value = false;
+  } finally {
+    loadingMore.value = false;
+  }
+}
+
+onMounted(async () => {
+  await loadMore();
+  loading.value = false;
+
+  io = new IntersectionObserver(
+    ([entry]) => {
+      if (entry.isIntersecting) loadMore();
+    },
+    { rootMargin: "900px" }
+  );
+
+  if (bottomEl.value) io.observe(bottomEl.value);
+});
 
 const sortFilter = {
   key: "sort",
@@ -143,7 +201,7 @@ const filtersConfig = computed(() => {
 });
 
 const processed = computed(() => {
-  let arr = floors.value;
+  let arr = products.value;
 
   const q = norm(searchQuery.value);
   if (q) arr = arr.filter((p) => norm(p.name).includes(q));
@@ -212,23 +270,13 @@ watch(
 );
 
 onBeforeUnmount(() => {
+  if (io) io.disconnect();
   if (resetTimerId) clearTimeout(resetTimerId);
 });
 
 const resetFilters = () => {
   searchQuery.value = "";
-  filterState.value = {
-    sort: "",
-    form: "",
-    structure: "",
-    class: "",
-    type: "",
-    moistureresistance: "",
-    substrate: "",
-    installation: "",
-    format: "",
-    surface: [],
-  };
+  filterState.value = defaultFilters();
   controlsKey.value++;
   filterKey.value++;
   searchKey.value++;
@@ -253,9 +301,9 @@ const resetFilters = () => {
             v-model="filterState"
             :filters="filtersConfig"
           />
-          <Button type="button" @click="resetFilters" class="btn-reset"
-            >Сбросить фильтры</Button
-          >
+          <Button type="button" @click="resetFilters" class="btn-reset">
+            Сбросить фильтры
+          </Button>
         </div>
       </div>
     </template>
@@ -268,6 +316,13 @@ const resetFilters = () => {
   <div v-if="loading" class="skeleton-grid">
     <SkeletonCard v-for="n in 6" :key="n" />
   </div>
+
+  <div ref="bottomEl" style="height: 1px"></div>
+
+  <p v-if="!loading && loadingMore" class="no-results">Загружаю ещё…</p>
+  <p v-else-if="!loading && !hasMore && products.length" class="no-results">
+    Больше товаров нет
+  </p>
 
   <p v-if="!loading && showNoResults" class="no-results">
     Товары с выбранными фильтрами отсутствуют!
