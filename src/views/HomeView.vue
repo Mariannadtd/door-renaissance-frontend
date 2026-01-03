@@ -33,6 +33,11 @@ const slides = [
     title: "Приходи к нам в гости. г. Сочи, ул. Гагарина 63",
     desc: "",
   },
+  {
+    src: new URL("../assets/img/percent.png", import.meta.url).href,
+    title: "Купи в рассрочку без переплат",
+    desc: "",
+  },
 ];
 
 onMounted(async () => {
@@ -243,7 +248,7 @@ const fittingsRandom = computed(() =>
 :deep(.slider .slide__caption)
   position: absolute
   top: -2rem
-  left: 16rem
+  left: 12rem
   color: black
   font-size: 2rem
   width: 68rem
@@ -262,9 +267,14 @@ const fittingsRandom = computed(() =>
     width: 100% !important
     padding: 1rem
 
+/* ===== ВОТ ТУТ ВОЗВРАТ КАК БЫЛО ДЛЯ 1-2-3 ===== */
 :deep(.slider .slide__img)
+  display: block
+  margin: 0 !important
+  padding: 0 !important
+  vertical-align: top
   height: 35rem
-  object-fit: cover
+  width: auto
   float: right
 
 :deep(.slider .nav)
@@ -274,4 +284,27 @@ const fittingsRandom = computed(() =>
   display: grid
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr))
   gap: 1rem
+
+:deep(.slider .slide:last-child)
+  background: var(--main) !important
+  position: relative
+  overflow: hidden
+  border-radius: 1.6rem
+
+:deep(.slider .slide:last-child .slide__img)
+  float: none !important
+  display: block
+  width: 100%
+  height: 100%
+  object-fit: cover
+  transform-origin: center
+  transform: scale(0.9) translateX(44rem) translateY(-1.6rem) !important
+
+  @media (max-width: $xx-large)
+    transform: scale(0.9) translateX(30rem) translateY(-1.6rem) !important
+  @media (max-width: $small)
+    transform: scale(0.9) translateX(10rem) translateY(-30rem) !important
+    width: 75rem !important
+    height: 75rem !important
+    margin-top: -28rem
 </style>

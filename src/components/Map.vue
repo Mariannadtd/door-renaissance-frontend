@@ -61,7 +61,7 @@ h1
 .text
   font-size: 1.6rem
   text-align: center
-  max-width: 600px
+  max-width: 900px
   margin: 0 auto
   & p
     margin-bottom: 1rem
