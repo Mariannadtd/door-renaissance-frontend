@@ -3,7 +3,17 @@
     "public": "dist",
     "predeploy": ["npm run build"],
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+
+    "redirects": [
+      {
+        "source": "/x",
+        "destination": "/?utm_source=qr&utm_medium=offline&utm_campaign=business_card",
+        "type": 302
+      }
+    ],
+
     "rewrites": [{ "source": "**", "destination": "/index.html" }],
+
     "headers": [
       {
         "source": "/index.html",

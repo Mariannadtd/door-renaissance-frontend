@@ -78,13 +78,9 @@ function prev() {
 
       <div class="content__wrapper">
         <div class="gallery">
-          <img
-            v-if="images.length"
-            :src="images[0]"
-            class="main-img"
-            @click="open(0)"
-            alt=""
-          />
+          <div v-if="images.length" class="main-frame" @click="open(0)">
+            <img :src="images[0]" class="main-img" alt="" />
+          </div>
           <div class="thumbs">
             <img
               v-for="(src, i) in images"
@@ -150,9 +146,14 @@ function prev() {
   text-align: start
 
 .product-detail
-  padding-top: 4rem
-  @media (max-width: $small)
-    padding: 2rem 0
+  background: transparent !important
+  overflow-x: hidden
+
+  .content,
+  .content__wrapper,
+  .gallery,
+  .info
+    min-width: 0
 
 .loader,
 .error
@@ -204,12 +205,13 @@ function prev() {
 
 .gallery
   flex: 1 1 45%
-  max-height: 50vh
+  max-height: none
+  width: 100%
+  min-width: 0
 
 .main-frame
   position: relative
   width: 100%
-  height: min(70vh, 48rem)
   overflow: hidden
   border-radius: .5rem
   background: #f7f7f7
@@ -217,15 +219,16 @@ function prev() {
   align-items: center
   justify-content: center
   cursor: zoom-in
+  height: min(520px, calc(100svh - 360px))
   @media (max-width: $small)
-    height: min(50vh, 28rem)
+    height: min(50svh, 28rem)
 
 .main-img
   display: block
-  max-width: 100%
-  max-height: 100%
+  width: 100%
+  height: 100%
   object-fit: contain
-  margin-left: auto
+  margin: 0
 
 .thumbs
   display: flex
