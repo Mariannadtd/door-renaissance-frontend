@@ -5,6 +5,8 @@ import Modal from "./UI/Modal.vue";
 import SocialLinks from "./SocialLinks.vue";
 import { RouterLink } from "vue-router";
 
+import logoMask from "../assets/img/logo20.png";
+
 const links = [
   { name: "Межкомнатные двери", href: "/interiors", class: "first__link" },
   { name: "Входные двери", href: "/exteriors", class: "second__link" },
@@ -39,7 +41,12 @@ function toggleNav() {
       </button>
 
       <a href="/" class="header__logo_group">
-        <span class="header__logo_img" role="img" aria-label="Логотип"></span>
+        <span
+          class="header__logo_img"
+          role="img"
+          aria-label="Логотип"
+          :style="{ '--logo-mask': `url(${logoMask})` }"
+        ></span>
         <p class="header__logo">Дверной<br />Ренессанс</p>
       </a>
 
@@ -124,8 +131,8 @@ header
     height: 7rem
     display: block
     background-color: var(--third-color)
-    -webkit-mask-image: url("../assets/img/lg2.png")
-    mask-image: url("../assets/img/lg2.png")
+    -webkit-mask-image: var(--logo-mask)
+    mask-image: var(--logo-mask)
     -webkit-mask-repeat: no-repeat
     mask-repeat: no-repeat
     -webkit-mask-position: center
@@ -242,7 +249,6 @@ nav.nav-container
 
   .header__call p
     display: none
-
 
 @media (max-width: $small)
   .header__logo_group
